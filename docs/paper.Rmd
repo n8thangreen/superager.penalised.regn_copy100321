@@ -1,0 +1,35 @@
+---
+title: "Superagers penalised regression with elastic net"
+header-includes: \usepackage{graphicx} \usepackage{bm}
+author: "Nathan Green"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  pdf_document:
+  word_document: default
+bibliography: My_Collection.bib
+nocite: |
+  @Baioetal:2017
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+@Rish2012
+@Pornpattananangkul
+@Cui2018
+@Carroll2009
+
+## Data
+
+```{r child = 'methods.Rmd'}
+```
+
+```{r child = 'results.Rmd'}
+```
+
+## Conclusions
+
+## References

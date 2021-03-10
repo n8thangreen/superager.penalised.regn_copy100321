@@ -1,0 +1,52 @@
+---
+title: "Superager Elastic Net Regression: Methods"
+author: "N Green"
+date: "12/12/2020"
+output: pdf_document
+bibliography: My_Collection.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Methods
+
+Let $X_1, \ldots, X_N$ be a set of $N$ predictors and let $Y$ be the response variable.
+We consider the problem of estimating the coefficients $\beta_i$ in the following linear regression model
+
+$$
+\hat{y} = x_1 \beta_1 + \cdots x_N \beta_N = \mathbf{X}\beta,
+$$
+
+where $\hat{y}$ is an approximation of $y$.
+The Ordinary Least Squares (OLS) regression finds a set of $\beta_i$ that minimize the sum-squared approximation error $(y-x \beta)^2$.
+
+In general, OLS solutions are often unsatisfactory, since there is no unique solution when $p \gg n$ and it is difficult to pinpoint which predictors are most relevant to the response.
+Various regularization approaches have been proposed in order to handle large-$p$, small-$n$ datasets, and to avoid the overfitting.
+Particularly, recently proposed sparse regularization methods such as Lasso, ridge regression and Elastic Net.
+Lasso and EN address both of the OLS shortcomings, since variable selection is embedded into their model-fitting process.
+Sparse regularization methods include the l1-norm regularization on the coefficients, which is known to produce sparse solutions, i.e. solutions with many zeros, thus eliminating predictors that are not essential.
+In this paper, we use the Elastic Net (EN) regression that finds an optimal solution to the OLS problem objective, augmented with additional regularization terms that include the sparsity-enforcing.
+
+l1-norm constraint on the regression coefficients that “shrinks” some coefficients to zero, and a “grouping” l2-norm constraint that enforces similar coefficients on predictors that are highly correlated with each other which l1-constraint alone do not provide.
+Formally, EN regression optimizes the following function
+
+$$
+L (\lambda_1, \lambda_2; \beta) = (y - x \beta)^2 + \lambda_1 \Vert \beta \Vert_1 + \lambda_2 \Vert \beta \Vert_2
+$$
+
+For each network $i$, let $Y$ be a binary outcome of either superager or control and $\mathbf{X}$ consist of 832 covariate measurements.
+This is modelled as
+
+$$
+logit(p^i) = \mathbf{X}^i \beta^i, \;\;\; i = 1, 2, \ldots, 11
+$$
+We can then obtain the odds-ratios using the fitted models to give an average comparison between individuals with or without a unit increase in a particular covariate $j$
+
+$$
+OR_j/OR = \frac{p_j/(1-p_j)}{p/(1-p)} = \exp(\beta_j)
+$$
+
+
+

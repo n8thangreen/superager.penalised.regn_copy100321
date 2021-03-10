@@ -1,0 +1,115 @@
+---
+title: "Superager Elastic Net Regression: Results"
+author: "N Green"
+date: "12/12/2020"
+output: pdf_document
+bibliography: My_Collection.bib
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+library(dplyr)
+library(png)
+library(superager.penalised.regn)
+```
+
+## Results
+
+```{r fig.show='hold', fig.align='center', out.width="20cm", out.height="40cm", echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:boxplots}Box plots showing estimated coefficient values using an elastic net model fitted to different data sets and stratified by brain network. Blue points are the individual values and the black box and points show median, 25th and 75th percentile and whiskers to largest and smallest values. a) 3T b) 3T cross-over cohort c) 7T d) 3T quality cohort."}
+library(magick)
+library(grid)
+library(ggplot2)
+
+rl <- list()
+rl[[1]] <-
+  image_read(here::here("output/boxplot_plot_3T.png")) %>%
+  image_annotate("a) ", size = 70)
+rl[[2]] <-
+  image_read(here::here("output/boxplot_plot_7T.png")) %>%
+  image_annotate("c) ", size = 70)
+rl[[3]] <-
+  image_read(here::here("output/boxplot_plot_3T_xover.png")) %>%
+  image_annotate("b) ", size = 70)
+rl[[4]] <-
+  image_read(here::here("output/boxplot_plot_3T_quality.png")) %>%
+  image_annotate("d) ", size = 70)
+
+gl <- lapply(rl, grid::rasterGrob)
+gridExtra::marrangeGrob(grobs = gl, nrow = 2, ncol = 2, top = "",
+                        widths = c(2,2))
+```
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:rgn_scatter3T} Scatterplot of model fits vs observed data and fitted regression for 3T and 7T datasets."}
+include_graphics(here::here("output/rgn_scatterplot_3T_7T.pdf"))
+```
+
+### Tables
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:summary_tab3T}"}
+kable(read.csv(here::here("data/summary_table_3T.csv")) %>% mutate(across(where(is.numeric), round, 3)),
+      caption = "Summary table for 3T.")
+```
+
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:summary_tab7T}"}
+kable(read.csv(here::here("data/summary_table_7T.csv")) %>% mutate(across(where(is.numeric), round, 3)),
+      caption = " Summary table for 7T.")
+```
+
+
+### Performance
+
+How well do the model predict the data they were fit with?
+
+The controls-superager classifications for each model and network.
+
+Model fit statistics for each network.
+RMSE = 0 and $R^2$ = 1 are best.
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:predtabs}"}
+load(here::here("data/predict_output.RData"))
+
+tab_3T <- 
+  purrr::map(stat_res$`3T`, "stats") %>%
+  do.call(rbind, .) %>%
+  round(2) %>% 
+  mutate(Network = rownames(.),
+    Rsquare = ifelse(is.na(Rsquare), "", Rsquare))
+
+tab_7T <- 
+  purrr::map(stat_res$`7T`, "stats") %>%
+  do.call(rbind, .) %>%
+  round(2) %>% 
+  mutate(Network = rownames(.),
+    Rsquare = ifelse(is.na(Rsquare), "", Rsquare))
+
+merge(tab_3T, tab_7T, by = "Network",
+      suffixes = c("_3T", "_7T")) %>% 
+  kable(caption = "Predictions tables for 3T and 7T.")
+
+tab_3Tq <- 
+  purrr::map(stat_res$`3T_quality`, "stats") %>%
+  do.call(rbind, .) %>%
+  round(2) %>% 
+  mutate(Network = rownames(.),
+    Rsquare = ifelse(is.na(Rsquare), "", Rsquare))
+
+tab_3Tx <- 
+  purrr::map(stat_res$`3T_xover`, "stats") %>%
+  do.call(rbind, .) %>%
+  round(2) %>% 
+  mutate(Network = rownames(.),
+    Rsquare = ifelse(is.na(Rsquare), "", Rsquare))
+
+merge(tab_3Tq, tab_3Tx, by = "Network",
+      suffixes = c("_3Tqual", "_3Tsame")) %>% 
+  kable(caption = "Predictions tables for 3T quality and cross-over.")
+```
+

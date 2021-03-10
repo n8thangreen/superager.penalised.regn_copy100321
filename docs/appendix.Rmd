@@ -1,0 +1,152 @@
+---
+title: "Superager Elastic Net Regression: Appendix"
+author: "Nathan Green"
+date: "12/12/2020"
+output: pdf_document
+bibliography: My_Collection.bib
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(knitr)
+library(png)
+library(dplyr)
+library(superager.penalised.regn)
+```
+
+## Scatter plots with regression line
+
+### 3T removing poor quality
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:rgn_scatter3T_quality} Scatterplot of model fits and fitted regression for 3T quality."}
+include_graphics(here::here("output/rgn_scatterplot_3T_quality.png"))
+```
+
+### 3T same-patient cohorts
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:rgn_scatter3T_xover} Scatterplot of model fits and fitted regression for 3T cross-over cohort."}
+include_graphics(here::here("output/rgn_scatterplot_3T_xover.png"))
+```
+
+
+## Plots of non-zero coefficient counts by mask
+
+```{r fig.show='hold', fig.align='center', out.width="20cm", out.height="40cm", echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:barplots}Bar plots by mask of counts of non-zero values coefficients using estimated coefficient values from an elastic net model fitted to different data sets and stratified by brain network. a) 3T b) 3T cross-over cohort c) 7T d) 3T quality cohort."}
+library(magick)
+library(grid)
+library(ggplot2)
+
+rl <- list()
+rl[[1]] <-
+  image_read(here::here("output/barplots_network_3T.png")) %>%
+  image_annotate("a) ", size = 70)
+rl[[2]] <-
+  image_read(here::here("output/barplots_network_7T.png")) %>%
+  image_annotate("c) ", size = 70)
+rl[[3]] <-
+  image_read(here::here("output/barplots_network_3T_xover.png")) %>%
+  image_annotate("b) ", size = 70)
+rl[[4]] <-
+  image_read(here::here("output/barplots_network_3T_quality.png")) %>%
+  image_annotate("d) ", size = 70)
+
+gl <- lapply(rl, grid::rasterGrob)
+gridExtra::marrangeGrob(grobs = gl, nrow = 2, ncol = 2, top = "",
+                        widths = c(2,2))
+```
+
+```{r fig.show='hold', fig.align='center', out.width="20cm", out.height="40cm", echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:tileplots}Tile plots by mask of counts of non-zero values coefficients using estimated coefficient values from an elastic net model fitted to different data sets and stratified by brain network. a) 3T b) 3T cross-over cohort c) 7T d) 3T quality cohort."}
+
+rl <- list()
+rl[[1]] <-
+  image_read(here::here("output/tile_plot_3T.png")) %>%
+  image_annotate("a) ", size = 70)
+rl[[2]] <-
+  image_read(here::here("output/tile_plot_7T.png")) %>%
+  image_annotate("c) ", size = 70)
+rl[[3]] <-
+  image_read(here::here("output/tile_plot_3T_xover.png")) %>%
+  image_annotate("b) ", size = 70)
+rl[[4]] <-
+  image_read(here::here("output/tile_plot_3T_quality.png")) %>%
+  image_annotate("d) ", size = 70)
+
+gl <- lapply(rl, grid::rasterGrob)
+gridExtra::marrangeGrob(grobs = gl, nrow = 2, ncol = 2, top = "",
+                        widths = c(2,2))
+```
+
+
+## L1 plots
+
+### 3T
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:L1_3T} L1 plots for 3T."}
+include_graphics(here::here("output/L1_plots_3T.png"))
+```
+
+### 7T
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:L1_7T} L1 plots for 7T."}
+include_graphics(here::here("output/L1_plots_7T.png"))
+```
+
+### 3T removing poor quality
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:L1_3T_quality} L1 plots for 3T quality."}
+include_graphics(here::here("output/L1_plots_3T_quality.png"))
+```
+
+### 3T same-patient cohorts
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:L1_3T_xover} L1 plots for 3T cross-over cohort."}
+include_graphics(here::here("output/L1_plots_3T_xover.png"))
+```
+
+## Summary tables
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:summary_tab3Tquality}"}
+kable(read.csv(here::here("data/summary_table_3T_quality.csv")) %>% mutate(across(where(is.numeric), round, 3)),
+      caption = "Summary table for 3T quality cohort.")
+```
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:summary_tab3Txover}"}
+kable(read.csv(here::here("data/summary_table_3T_xover.csv")) %>% mutate(across(where(is.numeric), round, 3)),
+      caption = "Summary table for 3T cross-over cohort.")
+```
+
+## Performance
+
+### Model predcitions
+#### 3T
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:pred_tab3T} Prediction table for 3T."}
+load(here::here("data/predict_output.RData"))
+purrr::map(stat_res$`3T`, "pred")
+```
+
+The estimated probabilities of being either control or superager.
+Values near 0.5 cannot distinguish individuals.
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap="\\label{fig:pred_tab3T} Prediction probabilities table for 3T."}
+purrr::map(stat_res$`3T`, "ppred")
+```
+
+
+### Contingency tables
+
+#### 3T
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(caret)
+
+load(file = here::here("data/predict_output.RData"))
+
+purrr::map(stat_res$`3T`, ~confusionMatrix(.x$pred,
+                as.factor(.x$obs_status - 1),
+                dnn = c("pred", "obs"))$table %>% kable())
+```
+
+#### 7T
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+purrr::map(stat_res$`7T`, ~confusionMatrix(.x$pred,
+                as.factor(.x$obs_status - 1),
+                dnn = c("pred", "obs"))$table %>% kable())
+```
